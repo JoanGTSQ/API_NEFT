@@ -5,8 +5,6 @@ import (
 	"neft.web/auth"
 	"neft.web/models"
 	"net/http"
-  "time"
-  
 )
 
 type Users struct {
@@ -19,25 +17,27 @@ func NewUsers(us models.UserService) *Users {
 	}
 }
 
+// GET /users 
+// Return all users in a JSON
 func (us *Users) RetrieveAllUsers(context *gin.Context) {
+
+  // Retrieve all users data
 	users, err := us.us.GetAllUsers()
 	if err != nil {
 		context.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		context.Abort()
 	}
-  for _, user := range users {
-    user.DOB, err = time.Parse("01-02-2006", user.DOB.Format("01-02-2006"))
-    if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		context.Abort()
-    return
-	}
-  }
+  
+  // Close connection returning code 200 and JSON with all users
 	context.JSON(http.StatusOK, answerV1(users))
 }
+
+// GET /user 
+// Obtain the remmember hash from the JWT token and return it in JSON
 func (us *Users) RetrieveUser(context *gin.Context) {
-  tokenNeft := context.GetHeader("neftAuth")
   
+  // Obtain data from JWT token
+  tokenNeft := context.GetHeader("neftAuth")
   claims, err := auth.ReturnClaims(tokenNeft)
   
   if err != nil {
@@ -45,18 +45,22 @@ func (us *Users) RetrieveUser(context *gin.Context) {
 		context.Abort()
 		return
   }
-
-  userComplete, err := us.us.ByRemember(claims.RemmemberHash)
+  
+  // Search the user from the claims by remmember hash
+  user, err := us.us.ByRemember(claims.RemmemberHash)
   if err != nil {
     context.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		context.Abort()
 		return
   }
-  context.JSON(http.StatusOK, userComplete)  
+
+  // Return JSON with user and code 200
+  context.JSON(http.StatusOK, answerV1(user))  
 }
 
 
-//
+// DELETE /users
+// Obtain user data, search by ID and delete it, return code 202
 func (us *Users) DeleteUser(context *gin.Context) {
   var user models.User
   
@@ -74,7 +78,8 @@ func (us *Users) DeleteUser(context *gin.Context) {
 		return
 	}
 
-  context.AbortWithStatus(202)
+  // Close connection with status 202 (resource deleted)
+  context.JSON(202, answerV1(nil))
   
 }
 
@@ -106,8 +111,11 @@ func (us *Users) RegisterUser(context *gin.Context) {
   
 	// Insert token in the header and return a 201 Code
   context.Header("neftAuth", tokenString)
-	context.AbortWithStatus(http.StatusCreated)
+	context.JSON(http.StatusCreated, answerV1(nil))
 }
+
+// POST /register
+// Retrieve data user from body and register it in the bbdd
 func (us *Users) CreateUser(context *gin.Context) {
 	var user models.User
 
@@ -123,8 +131,9 @@ func (us *Users) CreateUser(context *gin.Context) {
 		context.Abort()
 		return
 	}
-
-	context.AbortWithStatus(http.StatusCreated)
+  
+  // Close connection with status 201 (resource created)
+	context.JSON(http.StatusCreated, answerV1(nil))
 }
 
 
@@ -164,5 +173,5 @@ func (us *Users) Login(context *gin.Context) {
   
 	// Insert token in the header and return a 200 Code
   context.Header("neftAuth", tokenString)
-	context.AbortWithStatus(http.StatusOK)
+	context.JSON(http.StatusOK, answerV1(nil))
 }

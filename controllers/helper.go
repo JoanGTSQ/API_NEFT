@@ -1,5 +1,7 @@
 package controllers
 
+import "os"
+
 type messageAnswer struct {
 	Answer  interface{}
 	Message string `json:"message"`
@@ -8,6 +10,6 @@ type messageAnswer struct {
 func answerV1(middle interface{}) interface{} {
 	return messageAnswer{
 		Answer:  middle,
-		Message: "",
+		Message: os.Getenv("message"),
 	}
 }
