@@ -16,6 +16,7 @@ const (
 	ERR_MAIL_IS_TAKEN     = "ALFA-007"
 	ERR_MAIL_INVALID      = "ALFA-008"
 	ERR_MAIL_NOT_EXIST    = "ALFA-009"
+	ERR_NOT_FOUND_MODEL   = "models: resource not found"
 
 	ERR_PSSWD_INCORRECT  = "ALFA-010"
 	ERR_PSSWD_TOO_SHORT  = "ALFA-011"

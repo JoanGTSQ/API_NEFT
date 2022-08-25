@@ -2,6 +2,7 @@ package models
 
 import (
 	"errors"
+	"fmt"
 	"regexp"
 	"strings"
 	"time"
@@ -9,11 +10,10 @@ import (
 	"github.com/jinzhu/gorm"
 	_ "github.com/lib/pq"
 	"golang.org/x/crypto/bcrypt"
+	"neft.web/errorController"
 	"neft.web/hash"
 	"neft.web/rand"
-  "neft.web/errorController"
 )
-
 
 const (
 	userPwPPepper = "JUNneft"
@@ -115,7 +115,7 @@ func (uv *userValidator) passwordMinLength(user *User) error {
 		return nil
 	}
 	if len(user.Password) < 8 {
-		return errorController.RetrieveError(errorController.ERR_PSSWD_TOO_SHORT)  
+		return errorController.RetrieveError(errorController.ERR_PSSWD_TOO_SHORT)
 	}
 	return nil
 }
@@ -208,6 +208,12 @@ func (uv *userValidator) emailFormat(user *User) error {
 
 func (uv *userValidator) emailsIsAvail(user *User) error {
 	existing, err := uv.ByEmail(user.Email)
+	fmt.Println(err)
+	fmt.Println(errorController.RetrieveError(errorController.ERR_NOT_FOUND))
+	if err == errorController.RetrieveError(errorController.ERR_NOT_FOUND) {
+		return nil
+	}
+	fmt.Println("pass two")
 	if err != nil {
 		return errorController.RetrieveError(errorController.ERR_MAIL_NOT_EXIST)
 	}
@@ -351,7 +357,7 @@ func (us *userService) Authenticate(email, password string) (*User, error) {
 	if email == "" {
 		return nil, errorController.RetrieveError(errorController.ERR_MAIL_REQUIRED)
 	}
-  if password == "" {
+	if password == "" {
 		return nil, errorController.RetrieveError(errorController.ERR_PSSWD_REQUIRED)
 	}
 	emailRegex := regexp.MustCompile(`^[a-z0-9._%+\]+@[a-z0-9.\-]+\.[a-z]{2,16}$`)
@@ -416,8 +422,6 @@ func (ug *userGorm) GetAllUsers() ([]*User, error) {
 	}
 	return users, nil
 }
-
-
 
 type User struct {
 	NeftModel

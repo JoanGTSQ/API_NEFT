@@ -1,9 +1,10 @@
 package controllers
 
 import (
+	"net/http"
+
 	"github.com/gin-gonic/gin"
 	"neft.web/models"
-	"net/http"
 )
 
 type Teams struct {
@@ -16,8 +17,15 @@ func NewTeams(ts models.TeamService) *Teams {
 	}
 }
 
+/*
+// GET /team/:id
+// Obtain the ID number of team from the body and search
+*/
 func (ts *Teams) RetrieveCompleteTeam(context *gin.Context) {
-	team, err := ts.ts.AllTeamByID("1")
+
+	// Retrieve the entire team data by the param of the url
+	team, err := ts.ts.AllTeamByID(context.Param("id"))
+
 	if err != nil {
 		context.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		context.Abort()
