@@ -1,0 +1,21 @@
+version: "1"
+root: .
+
+tmp_path: ./tmp
+build_name: "fresh-build"
+build_args: ""
+run_args: ""
+build_log: runner-build-errors.log
+valid_ext: .go, .tpl, .tmpl, .html, .gohtml
+no_rebuild_ext: .tpl, .tmpl, .html, .css, .img, .js, .md 
+ignore: app-assets/*, app-assets/*/*, app-assets/*/*/*, app-assets/*/*/*/*, assets/*, tmp/*
+build_delay: "1200"
+colors: true
+log_color_main: cyan
+log_color_build: yellow
+log_color_runner: green
+log_color_watcher: magenta
+log_color_app: "red"
+delve: false
+delve_args: ""
+debug: false
