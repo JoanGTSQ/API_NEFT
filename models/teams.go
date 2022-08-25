@@ -92,22 +92,22 @@ type Team struct {
 
 	Name string `gorm:"not null"`
 
-	TeamLeadID int  `gorm:"" json:"teamleadid"`
+	TeamLeadID int  `gorm:"unique_index" json:"teamleadid"`
 	TeamLead   User `gorm:"foreignkey:TeamLeadId" json:"teamlead"`
 
-	Member1ID int  `gorm:"" json:"member1id"`
+	Member1ID int  `gorm:"unique_index" json:"member1id"`
 	Member1   User `gorm:"foreignkey:Member1ID" json:"member1"`
 
-	Member2ID int  `gorm:"" json:"member2id"`
+	Member2ID int  `gorm:"unique_index" json:"member2id"`
 	Member2   User `gorm:"foreignkey:Member2ID" json:"member2"`
 
-	Member3ID int  `gorm:"" json:"member3id"`
+	Member3ID int  `gorm:"unique_index" json:"member3id"`
 	Member3   User `gorm:"foreignkey:Member3ID" json:"member3"`
 
-	Member4ID int  `gorm:"" json:"member4id"`
+	Member4ID int  `gorm:"unique_index" json:"member4id"`
 	Member4   User `gorm:"foreignkey:Member4ID" json:"member4"`
 
-	Member5ID int  `gorm:"" json:"member5id"`
+	Member5ID int  `gorm:"unique_index" json:"member5id"`
 	Member5   User `gorm:"foreignkey:Member5ID" json:"member5"`
 
 	Division1ID int      `gorm:"" json:"division1id"`

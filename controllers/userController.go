@@ -11,6 +11,13 @@ type Users struct {
 	us models.UserService
 }
 
+
+
+type LoginStruct struct {
+	Email    string `json:"email"`
+	Password string `json:"password"`
+}
+
 func NewUsers(us models.UserService) *Users {
 	return &Users{
 		us: us,
@@ -134,13 +141,6 @@ func (us *Users) CreateUser(context *gin.Context) {
   
   // Close connection with status 201 (resource created)
 	context.JSON(http.StatusCreated, answerV1(nil))
-}
-
-
-
-type LoginStruct struct {
-	Email    string `json:"email"`
-	Password string `json:"password"`
 }
 
 // POST /login

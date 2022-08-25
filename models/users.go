@@ -351,6 +351,9 @@ func (us *userService) Authenticate(email, password string) (*User, error) {
 	if email == "" {
 		return nil, errorController.RetrieveError(errorController.ERR_MAIL_REQUIRED)
 	}
+  if password == "" {
+		return nil, errorController.RetrieveError(errorController.ERR_PSSWD_REQUIRED)
+	}
 	emailRegex := regexp.MustCompile(`^[a-z0-9._%+\]+@[a-z0-9.\-]+\.[a-z]{2,16}$`)
 	if !emailRegex.MatchString(email) {
 		return nil, errorController.RetrieveError(errorController.ERR_MAIL_IS_N0T_VALID)
@@ -362,9 +365,7 @@ func (us *userService) Authenticate(email, password string) (*User, error) {
 	if err != nil {
 		return nil, errorController.RetrieveError(errorController.ERR_MAIL_NOT_EXIST)
 	}
-	if password == "" {
-		return nil, errorController.RetrieveError(errorController.ERR_PSSWD_REQUIRED)
-	}
+
 	err = bcrypt.CompareHashAndPassword([]byte(foundUser.PasswordHash), []byte(password+userPwPPepper))
 	if err != nil {
 		switch err {
