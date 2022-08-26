@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -10,7 +9,7 @@ import (
 )
 
 type Users struct {
-	us models.UserService
+	us models.UserService  
 }
 
 type LoginStruct struct {
@@ -100,7 +99,6 @@ func (us *Users) RegisterUser(context *gin.Context) {
 		context.Abort()
 		return
 	}
-	fmt.Println(user)
 	// Create user with the data received
 	if err := us.us.Create(&user); err != nil {
 		context.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -121,7 +119,7 @@ func (us *Users) RegisterUser(context *gin.Context) {
 	context.AbortWithStatus(http.StatusCreated)
 }
 
-// POST /register
+// PUT /auth
 // Retrieve data user from body and register it in the bbdd
 func (us *Users) CreateUser(context *gin.Context) {
 	var user models.User
@@ -143,7 +141,7 @@ func (us *Users) CreateUser(context *gin.Context) {
 	context.AbortWithStatus(http.StatusCreated)
 }
 
-// POST /login
+// POST /auth
 // Obtain login data (email,password), authenticate it and return jwt token in header
 func (us *Users) Login(context *gin.Context) {
 	var form LoginStruct

@@ -6,7 +6,6 @@ import (
 	valid "github.com/asaskevich/govalidator"
 	"github.com/jinzhu/gorm"
 	_ "github.com/lib/pq"
-	"neft.web/errorController"
 	"neft.web/hash"
 )
 
@@ -69,7 +68,7 @@ func (ug *teamGorm) ByID(id uint) (*Team, error) {
 // SEARCH BY ID
 func (ug *teamGorm) AllTeamByID(id string) (*[]Team, error) {
 	if !valid.IsInt(id) {
-		return nil, errorController.RetrieveError(errorController.ERR_ID_INVALID)
+		return nil, ERR_ID_INVALID
 	}
 	var team []Team
 	db := ug.db.Where("id = ?", id).
