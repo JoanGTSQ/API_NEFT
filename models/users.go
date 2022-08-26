@@ -4,8 +4,11 @@ import (
 	"errors"
 	"fmt"
 	"regexp"
+	"strconv"
 	"strings"
 	"time"
+
+	valid "github.com/asaskevich/govalidator"
 
 	"github.com/jinzhu/gorm"
 	_ "github.com/lib/pq"
@@ -28,7 +31,7 @@ type UserDB interface {
 
 	Create(user *User) error
 	Update(user *User) error
-	Delete(id uint) error
+	Delete(id string) error
 }
 
 type UserService interface {
@@ -272,12 +275,9 @@ func (uv *userValidator) Update(user *User) error {
 	return uv.UserDB.Update(user)
 }
 
-func (uv *userValidator) Delete(id uint) error {
-	var user User
-	user.ID = id
-	err := runUserValFuncs(&user, uv.idGreaterThanZero)
-	if err != nil {
-		return err
+func (uv *userValidator) Delete(id string) error {
+	if !valid.IsInt(id) {
+		return ERR_ID_INVALID
 	}
 	return uv.UserDB.Delete(id)
 }
@@ -414,8 +414,12 @@ func (ug *userGorm) Create(user *User) error {
 	return nil
 }
 
-func (ug *userGorm) Delete(id uint) error {
-	user := User{NeftModel: NeftModel{ID: id}}
+func (ug *userGorm) Delete(id string) error {
+	varInt, err := strconv.Atoi(id)
+	if err != nil {
+		return ERR_ID_INVALID
+	}
+	user := User{NeftModel: NeftModel{ID: uint(varInt)}}
 	return ug.db.Delete(&user).Error
 }
 
