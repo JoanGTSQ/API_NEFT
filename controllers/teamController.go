@@ -33,3 +33,28 @@ func (ts *Teams) RetrieveCompleteTeam(context *gin.Context) {
 	}
 	context.JSON(http.StatusOK, team)
 }
+
+/*
+// PUT /team
+// Create team from the body received
+*/
+func (ts *Teams) CreateTeam(context *gin.Context) {
+  var team models.Team
+
+	// Obtain the body in the request and parse to the user
+	if err := context.ShouldBindJSON(&team); err != nil {
+		context.JSON(http.StatusBadRequest, gin.H{"error": err})
+		context.Abort()
+		return
+	}
+  
+  // Create user with the data received
+	if err := ts.ts.Create(&team); err != nil {
+		context.JSON(http.StatusInternalServerError, gin.H{"error": err})
+		context.Abort()
+		return
+	}
+  
+	// Close connection with status 201 (resource created)
+  context.AbortWithStatus(http.StatusCreated)
+}

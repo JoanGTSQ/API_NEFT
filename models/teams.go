@@ -2,7 +2,7 @@ package models
 
 import (
 	"regexp"
-
+  "strconv"
 	valid "github.com/asaskevich/govalidator"
 	"github.com/jinzhu/gorm"
 	_ "github.com/lib/pq"
@@ -12,6 +12,11 @@ import (
 type TeamDB interface {
 	ByID(id uint) (*Team, error)
 	AllTeamByID(id string) (*[]Team, error)
+
+
+  Create(team *Team) error
+	Update(team *Team) error
+	Delete(id string) error
 }
 
 type TeamService interface {
@@ -57,6 +62,28 @@ var _ TeamDB = &teamGorm{}
 type teamGorm struct {
 	db *gorm.DB
 }
+
+func (tg *teamGorm) Create(team *Team) error {
+	err := tg.db.Create(team).Error
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (tg *teamGorm) Delete(id string) error {
+	varInt, err := strconv.Atoi(id)
+	if err != nil {
+		return ERR_ID_INVALID
+	}
+	team := Team{NeftModel: NeftModel{ID: uint(varInt)}}
+	return tg.db.Delete(&team).Error
+}
+
+func (tg *teamGorm) Update(team *Team) error {
+	return tg.db.Save(team).Error
+}
+
 
 func (ug *teamGorm) ByID(id uint) (*Team, error) {
 	var team Team
