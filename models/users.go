@@ -2,7 +2,6 @@ package models
 
 import (
 	"errors"
-	"fmt"
 	"regexp"
 	"strconv"
 	"strings"
@@ -213,21 +212,12 @@ func (uv *userValidator) emailsIsAvail(user *User) error {
 
 	switch err {
 	case ERR_NOT_FOUND:
-		fmt.Println("lo detecto bien inutil")
 		return nil
 	case nil:
 
 	default:
 		return ERR_MAIL_NOT_EXIST
 	}
-	// fmt.Println(errorController.RetrieveError(errorController.ERR_NOT_FOUND))
-	// if err == errorController.RetrieveError(errorController.ERR_NOT_FOUND) {
-	// 	return nil
-	// }
-	// fmt.Println("pass two")
-	// if err != nil {
-	// 	return errorController.RetrieveError(errorController.ERR_MAIL_NOT_EXIST)
-	// }
 
 	if user.ID != existing.ID {
 		return ERR_MAIL_IS_TAKEN
@@ -262,6 +252,7 @@ func (uv *userValidator) Update(user *User) error {
 		uv.passwordMinLength,
 		uv.bcryptPassword,
 		uv.passwordHashRequired,
+		uv.defaultify,
 		uv.rememberMinBytes,
 		uv.hmacRemember,
 		uv.rememberHashRequired,
