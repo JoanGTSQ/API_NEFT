@@ -190,3 +190,16 @@ func (us *Users) Login(context *gin.Context) {
 	context.Header("neftAuth", tokenString)
 	context.AbortWithStatus(http.StatusOK)
 }
+
+// GET /user/:id/recover
+func (us *Users) InitiateReset(context *gin.Context) {
+
+	token, err := us.us.InitiateReset(context.Param("id"))
+	if err != nil {
+		context.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		context.Abort()
+		return
+	}
+
+	context.JSON(http.StatusOK, token)
+}

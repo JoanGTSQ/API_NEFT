@@ -2,7 +2,8 @@ package models
 
 import (
 	"regexp"
-  "strconv"
+	"strconv"
+
 	valid "github.com/asaskevich/govalidator"
 	"github.com/jinzhu/gorm"
 	_ "github.com/lib/pq"
@@ -13,8 +14,7 @@ type TeamDB interface {
 	ByID(id uint) (*Team, error)
 	AllTeamByID(id string) (*[]Team, error)
 
-
-  Create(team *Team) error
+	Create(team *Team) error
 	Update(team *Team) error
 	Delete(id string) error
 }
@@ -83,7 +83,6 @@ func (tg *teamGorm) Delete(id string) error {
 func (tg *teamGorm) Update(team *Team) error {
 	return tg.db.Save(team).Error
 }
-
 
 func (ug *teamGorm) ByID(id uint) (*Team, error) {
 	var team Team

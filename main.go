@@ -54,6 +54,7 @@ func initRouter(userC *controllers.Users, rolesC *controllers.Roles, teamsC *con
 		secured := api.Group("/secured").Use(middlewares.RequireAuth())
 		{
 			secured.GET("/user", userC.RetrieveUser)
+			secured.GET("/user/:id/recover", userC.InitiateReset)
 			secured.GET("/users", userC.RetrieveAllUsers)
 			secured.POST("/users", userC.CreateUser)
 			secured.PATCH("/users", userC.UpdateUser)

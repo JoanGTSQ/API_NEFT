@@ -36,7 +36,7 @@ type UserDB interface {
 type UserService interface {
 	Authenticate(email, password string) (*User, error)
 
-	InitiateReset(userID uint) (string, error)
+	InitiateReset(userID string) (string, error)
 	CompleteReset(token, newPw string) (*User, error)
 	UserDB
 }
@@ -316,9 +316,13 @@ func (ug *userGorm) ByRemember(rememberHash string) (*User, error) {
 	return &user, err
 }
 
-func (us *userService) InitiateReset(userID uint) (string, error) {
+func (us *userService) InitiateReset(userID string) (string, error) {
+	id, err := strconv.Atoi(userID)
+	if err != nil {
+		return "", ERR_ID_INVALID
+	}
 	pwr := pwReset{
-		UserID: userID,
+		UserID: uint(id),
 	}
 	if err := us.pwResetDB.Create(&pwr); err != nil {
 		return "", err

@@ -8,10 +8,10 @@ import (
 )
 
 type Teams struct {
-	ts models.TeamService
+	ts models.TeamDB
 }
 
-func NewTeams(ts models.TeamService) *Teams {
+func NewTeams(ts models.TeamDB) *Teams {
 	return &Teams{
 		ts: ts,
 	}
@@ -39,22 +39,22 @@ func (ts *Teams) RetrieveCompleteTeam(context *gin.Context) {
 // Create team from the body received
 */
 func (ts *Teams) CreateTeam(context *gin.Context) {
-  var team models.Team
+	var team models.Team
 
 	// Obtain the body in the request and parse to the user
 	if err := context.ShouldBindJSON(&team); err != nil {
-		context.JSON(http.StatusBadRequest, gin.H{"error": err})
+		context.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		context.Abort()
 		return
 	}
-  
-  // Create user with the data received
+
+	// Create user with the data received
 	if err := ts.ts.Create(&team); err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{"error": err})
+		context.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		context.Abort()
 		return
 	}
-  
+
 	// Close connection with status 201 (resource created)
-  context.AbortWithStatus(http.StatusCreated)
+	context.AbortWithStatus(http.StatusCreated)
 }
