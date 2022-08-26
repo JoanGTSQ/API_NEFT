@@ -57,7 +57,7 @@ func initRouter(userC *controllers.Users, rolesC *controllers.Roles, teamsC *con
 			secured.GET("/user", userC.RetrieveUser)
 			secured.GET("/users", userC.RetrieveAllUsers)
 			secured.POST("/users", userC.CreateUser)
-			secured.DELETE("/users", userC.DeleteUser)
+			secured.DELETE("/users/:id", userC.DeleteUser)
 
 			secured.GET("/roles", rolesC.RetrieveAllRoles)
 			secured.GET("/roleUser", rolesC.RetrieveUsersOfRol)

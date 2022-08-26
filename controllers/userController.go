@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -10,7 +9,7 @@ import (
 )
 
 type Users struct {
-	us models.UserService
+	us models.UserService  
 }
 
 type LoginStruct struct {
@@ -31,7 +30,7 @@ func (us *Users) RetrieveAllUsers(context *gin.Context) {
 	// Retrieve all users data
 	users, err := us.us.GetAllUsers()
 	if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		context.JSON(http.StatusInternalServerError, gin.H{"error": RetrieveErrorAPI(err)})
 		context.Abort()
 	}
 
@@ -48,7 +47,7 @@ func (us *Users) RetrieveUser(context *gin.Context) {
 	claims, err := auth.ReturnClaims(tokenNeft)
 
 	if err != nil {
-		context.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		context.JSON(http.StatusBadRequest, gin.H{"error": RetrieveErrorAPI(err)})
 		context.Abort()
 		return
 	}
@@ -56,7 +55,7 @@ func (us *Users) RetrieveUser(context *gin.Context) {
 	// Search the user from the claims by remmember hash
 	user, err := us.us.ByRemember(claims.RemmemberHash)
 	if err != nil {
-		context.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		context.JSON(http.StatusBadRequest, gin.H{"error": RetrieveErrorAPI(err)})
 		context.Abort()
 		return
 	}
@@ -65,21 +64,13 @@ func (us *Users) RetrieveUser(context *gin.Context) {
 	context.JSON(http.StatusOK, user)
 }
 
-// DELETE /users
+// DELETE /users/:id
 // Obtain user data, search by ID and delete it, return code 202
 func (us *Users) DeleteUser(context *gin.Context) {
-	var user models.User
-
-	// Obtain the body in the request and parse to the user
-	if err := context.ShouldBindJSON(&user); err != nil {
-		context.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		context.Abort()
-		return
-	}
 
 	// Try to delete the user
-	if err := us.us.Delete(user.ID); err != nil {
-		context.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	if err := us.us.Delete(context.Param("id")); err != nil {
+		context.JSON(http.StatusBadRequest, gin.H{"error": RetrieveErrorAPI(err)})
 		context.Abort()
 		return
 	}
@@ -96,14 +87,13 @@ func (us *Users) RegisterUser(context *gin.Context) {
 
 	// Obtain the body in the request and parse to the user
 	if err := context.ShouldBindJSON(&user); err != nil {
-		context.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		context.JSON(http.StatusBadRequest, gin.H{"error": RetrieveErrorAPI(err)})
 		context.Abort()
 		return
 	}
-	fmt.Println(user)
 	// Create user with the data received
 	if err := us.us.Create(&user); err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		context.JSON(http.StatusInternalServerError, gin.H{"error": RetrieveErrorAPI(err)})
 		context.Abort()
 		return
 	}
@@ -111,7 +101,7 @@ func (us *Users) RegisterUser(context *gin.Context) {
 	// Generate  JWT Token
 	tokenString, err := auth.GenerateJWT(user.RememberHash, user.RolID)
 	if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		context.JSON(http.StatusInternalServerError, gin.H{"error": RetrieveErrorAPI(err)})
 		context.Abort()
 		return
 	}
@@ -121,20 +111,20 @@ func (us *Users) RegisterUser(context *gin.Context) {
 	context.AbortWithStatus(http.StatusCreated)
 }
 
-// POST /register
+// PUT /auth
 // Retrieve data user from body and register it in the bbdd
 func (us *Users) CreateUser(context *gin.Context) {
 	var user models.User
 
 	// Obtain the body in the request and parse to the user
 	if err := context.ShouldBindJSON(&user); err != nil {
-		context.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		context.JSON(http.StatusBadRequest, gin.H{"error": RetrieveErrorAPI(err)})
 		context.Abort()
 		return
 	}
 	// Create user with the data received
 	if err := us.us.Create(&user); err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		context.JSON(http.StatusInternalServerError, gin.H{"error": RetrieveErrorAPI(err)})
 		context.Abort()
 		return
 	}
@@ -143,14 +133,14 @@ func (us *Users) CreateUser(context *gin.Context) {
 	context.AbortWithStatus(http.StatusCreated)
 }
 
-// POST /login
+// POST /auth
 // Obtain login data (email,password), authenticate it and return jwt token in header
 func (us *Users) Login(context *gin.Context) {
 	var form LoginStruct
 
 	// Obtain the body in the request and parse to the LoginStruct
 	if err := context.ShouldBindJSON(&form); err != nil {
-		context.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		context.JSON(http.StatusBadRequest, gin.H{"error": RetrieveErrorAPI(err)})
 		context.Abort()
 		return
 	}
@@ -158,7 +148,7 @@ func (us *Users) Login(context *gin.Context) {
 	// Try to auth with the inserted data and return an error or a user
 	userAuth, err := us.us.Authenticate(form.Email, form.Password)
 	if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		context.JSON(http.StatusInternalServerError, gin.H{"error": RetrieveErrorAPI(err)})
 		context.Abort()
 		return
 	}
@@ -166,7 +156,7 @@ func (us *Users) Login(context *gin.Context) {
 	// Generate  JWT Token
 	tokenString, err := auth.GenerateJWT(userAuth.RememberHash, userAuth.RolID)
 	if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		context.JSON(http.StatusInternalServerError, gin.H{"error": RetrieveErrorAPI(err)})
 		context.Abort()
 		return
 	}

@@ -4,13 +4,15 @@ import (
 	"errors"
 	"fmt"
 	"regexp"
+	"strconv"
 	"strings"
 	"time"
+
+	valid "github.com/asaskevich/govalidator"
 
 	"github.com/jinzhu/gorm"
 	_ "github.com/lib/pq"
 	"golang.org/x/crypto/bcrypt"
-	"neft.web/errorController"
 	"neft.web/hash"
 	"neft.web/rand"
 )
@@ -29,7 +31,7 @@ type UserDB interface {
 
 	Create(user *User) error
 	Update(user *User) error
-	Delete(id uint) error
+	Delete(id string) error
 }
 
 type UserService interface {
@@ -115,21 +117,21 @@ func (uv *userValidator) passwordMinLength(user *User) error {
 		return nil
 	}
 	if len(user.Password) < 8 {
-		return errorController.RetrieveError(errorController.ERR_PSSWD_TOO_SHORT)
+		return ERR_PSSWD_TOO_SHORT
 	}
 	return nil
 }
 
 func (uv *userValidator) passwordHashRequired(user *User) error {
 	if user.PasswordHash == "" {
-		return errorController.RetrieveError(errorController.ERR_PSSWD_REQUIRED)
+		return ERR_PSSWD_REQUIRED
 	}
 	return nil
 }
 
 func (uv *userValidator) passwordRequired(user *User) error {
 	if user.Password == "" {
-		return errorController.RetrieveError(errorController.ERR_PSSWD_REQUIRED)
+		return ERR_PSSWD_REQUIRED
 	}
 	return nil
 }
@@ -165,19 +167,19 @@ func (uv *userValidator) rememberMinBytes(user *User) error {
 
 	}
 	if n < 32 {
-		return errorController.RetrieveError(errorController.ERR_REMMEMBER_TOO_SHOT)
+		return ERR_REMMEMBER_TOO_SHOT
 	}
 	return nil
 }
 func (uv *userValidator) rememberHashRequired(user *User) error {
 	if user.RememberHash == "" {
-		return errorController.RetrieveError(errorController.ERR_REMMEMBER_REQUIRED)
+		return ERR_REMMEMBER_REQUIRED
 	}
 	return nil
 }
 func (uv *userValidator) idGreaterThanZero(user *User) error {
 	if user.ID <= 0 {
-		return errorController.RetrieveError(errorController.ERR_ID_INVALID)
+		return ERR_ID_INVALID
 	}
 	return nil
 }
@@ -191,7 +193,7 @@ func (uv *userValidator) normalizeEmail(user *User) error {
 
 func (uv *userValidator) requireEmail(user *User) error {
 	if user.Email == "" {
-		return errorController.RetrieveError(errorController.ERR_MAIL_REQUIRED)
+		return ERR_MAIL_REQUIRED
 	}
 	return nil
 }
@@ -201,25 +203,34 @@ func (uv *userValidator) emailFormat(user *User) error {
 		return nil
 	}
 	if !uv.emailRegex.MatchString(user.Email) {
-		return errorController.RetrieveError(errorController.ERR_MAIL_IS_N0T_VALID)
+		return ERR_MAIL_IS_N0T_VALID
 	}
 	return nil
 }
 
 func (uv *userValidator) emailsIsAvail(user *User) error {
 	existing, err := uv.ByEmail(user.Email)
-	fmt.Println(err)
-	fmt.Println(errorController.RetrieveError(errorController.ERR_NOT_FOUND))
-	if err == errorController.RetrieveError(errorController.ERR_NOT_FOUND) {
+
+	switch err {
+	case ERR_NOT_FOUND:
+		fmt.Println("lo detecto bien inutil")
 		return nil
+	case nil:
+
+	default:
+		return ERR_MAIL_NOT_EXIST
 	}
-	fmt.Println("pass two")
-	if err != nil {
-		return errorController.RetrieveError(errorController.ERR_MAIL_NOT_EXIST)
-	}
+	// fmt.Println(errorController.RetrieveError(errorController.ERR_NOT_FOUND))
+	// if err == errorController.RetrieveError(errorController.ERR_NOT_FOUND) {
+	// 	return nil
+	// }
+	// fmt.Println("pass two")
+	// if err != nil {
+	// 	return errorController.RetrieveError(errorController.ERR_MAIL_NOT_EXIST)
+	// }
 
 	if user.ID != existing.ID {
-		return errorController.RetrieveError(errorController.ERR_MAIL_IS_TAKEN)
+		return ERR_MAIL_IS_TAKEN
 	}
 
 	return nil
@@ -264,12 +275,9 @@ func (uv *userValidator) Update(user *User) error {
 	return uv.UserDB.Update(user)
 }
 
-func (uv *userValidator) Delete(id uint) error {
-	var user User
-	user.ID = id
-	err := runUserValFuncs(&user, uv.idGreaterThanZero)
-	if err != nil {
-		return err
+func (uv *userValidator) Delete(id string) error {
+	if !valid.IsInt(id) {
+		return ERR_ID_INVALID
 	}
 	return uv.UserDB.Delete(id)
 }
@@ -277,7 +285,7 @@ func (uv *userValidator) Delete(id uint) error {
 func (uv *userValidator) ByRemember(token string) (*User, error) {
 
 	if token == "" {
-		return nil, errorController.RetrieveError(errorController.ERR_REMMEMBER_REQUIRED)
+		return nil, ERR_REMMEMBER_REQUIRED
 	}
 
 	return uv.UserDB.ByRemember(token)
@@ -308,6 +316,7 @@ func (ug *userGorm) ByEmail(email string) (*User, error) {
 	db := ug.db.Where("email = ?", email)
 	err := first(db, &user)
 	return &user, err
+
 }
 
 func (ug *userGorm) ByRemember(rememberHash string) (*User, error) {
@@ -340,7 +349,7 @@ func (us *userService) CompleteReset(token, newPw string) (*User, error) {
 	}
 	err = bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(newPw+userPwPPepper))
 	if err == nil {
-		return nil, errorController.RetrieveError(errorController.ERR_PSSWD_SAME_RESET)
+		return nil, ERR_PSSWD_SAME_RESET
 	}
 	user.Password = newPw
 	err = us.Update(user)
@@ -355,28 +364,28 @@ func (us *userService) CompleteReset(token, newPw string) (*User, error) {
 
 func (us *userService) Authenticate(email, password string) (*User, error) {
 	if email == "" {
-		return nil, errorController.RetrieveError(errorController.ERR_MAIL_REQUIRED)
+		return nil, ERR_MAIL_REQUIRED
 	}
 	if password == "" {
-		return nil, errorController.RetrieveError(errorController.ERR_PSSWD_REQUIRED)
+		return nil, ERR_PSSWD_REQUIRED
 	}
 	emailRegex := regexp.MustCompile(`^[a-z0-9._%+\]+@[a-z0-9.\-]+\.[a-z]{2,16}$`)
 	if !emailRegex.MatchString(email) {
-		return nil, errorController.RetrieveError(errorController.ERR_MAIL_IS_N0T_VALID)
+		return nil, ERR_MAIL_IS_N0T_VALID
 	}
 	email = strings.ToLower(email)
 	email = strings.TrimSpace(email)
 
 	foundUser, err := us.ByEmail(email)
 	if err != nil {
-		return nil, errorController.RetrieveError(errorController.ERR_MAIL_NOT_EXIST)
+		return nil, ERR_MAIL_NOT_EXIST
 	}
 
 	err = bcrypt.CompareHashAndPassword([]byte(foundUser.PasswordHash), []byte(password+userPwPPepper))
 	if err != nil {
 		switch err {
 		case bcrypt.ErrMismatchedHashAndPassword:
-			return nil, errorController.RetrieveError(errorController.ERR_PSSWD_INCORRECT)
+			return nil, ERR_PSSWD_INCORRECT
 		default:
 			return nil, err
 		}
@@ -391,7 +400,7 @@ func first(db *gorm.DB, dst interface{}) error {
 	case nil:
 		return nil
 	case gorm.ErrRecordNotFound:
-		return errorController.RetrieveError(errorController.ERR_NOT_FOUND)
+		return ERR_NOT_FOUND
 	default:
 		return err
 	}
@@ -405,8 +414,12 @@ func (ug *userGorm) Create(user *User) error {
 	return nil
 }
 
-func (ug *userGorm) Delete(id uint) error {
-	user := User{NeftModel: NeftModel{ID: id}}
+func (ug *userGorm) Delete(id string) error {
+	varInt, err := strconv.Atoi(id)
+	if err != nil {
+		return ERR_ID_INVALID
+	}
+	user := User{NeftModel: NeftModel{ID: uint(varInt)}}
 	return ug.db.Delete(&user).Error
 }
 

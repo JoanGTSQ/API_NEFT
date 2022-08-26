@@ -2,7 +2,6 @@ package models
 
 import (
 	"github.com/jinzhu/gorm"
-	"neft.web/errorController"
 	"neft.web/hash"
 	"neft.web/rand"
 )
@@ -49,7 +48,7 @@ func (pwrv *pwResetValidator) Create(pwr *pwReset) error {
 
 func (pwrv *pwResetValidator) Delete(id uint) error {
 	if id <= 0 {
-		return errorController.RetrieveError(errorController.ERR_ID_INVALID)
+		return ERR_ID_INVALID
 	}
 	return pwrv.pwResetDB.Delete(id)
 }
@@ -74,7 +73,7 @@ func (pwrg *pwResetGorm) Delete(id uint) error {
 
 func (pwrv *pwResetValidator) requireUserID(pwr *pwReset) error {
 	if pwr.UserID <= 0 {
-		return errorController.RetrieveError(errorController.ERR_USERID_REQUIRED)
+		return ERR_USERID_REQUIRED
 	}
 	return nil
 }
