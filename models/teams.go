@@ -4,7 +4,6 @@ import (
 	"regexp"
 	"strconv"
 
-	valid "github.com/asaskevich/govalidator"
 	"github.com/jinzhu/gorm"
 	_ "github.com/lib/pq"
 	"neft.web/hash"
@@ -12,7 +11,7 @@ import (
 
 type TeamDB interface {
 	ByID(id uint) (*Team, error)
-	AllTeamByID(id string) (*[]Team, error)
+	AllTeamByID(id uint) (*Team, error)
 
 	Create(team *Team) error
 	Update(team *Team) error
@@ -92,11 +91,8 @@ func (ug *teamGorm) ByID(id uint) (*Team, error) {
 }
 
 // SEARCH BY ID
-func (ug *teamGorm) AllTeamByID(id string) (*[]Team, error) {
-	if !valid.IsInt(id) {
-		return nil, ERR_ID_INVALID
-	}
-	var team []Team
+func (ug *teamGorm) AllTeamByID(id uint) (*Team, error) {
+	var team Team
 	db := ug.db.Where("id = ?", id).
 		Preload("TeamLead").
 		// Preload("TeamLead.Rol").
@@ -113,7 +109,7 @@ func (ug *teamGorm) AllTeamByID(id string) (*[]Team, error) {
 		Preload("Division1").
 		Preload("Division1.Commandant").
 		Preload("AssignedMission").
-		Find(&team).Error
+		First(&team).Error
 	return &team, db
 }
 

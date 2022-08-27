@@ -14,7 +14,7 @@ func main() {
 
 	// Create connection with DB
 	services, err := models.NewServices(fmt.Sprintf(
-		"host=%s port=%d user=%s password=%s dbname=%s sslmode=require",
+		"host=%s port=%d user=%s password=%s dbname=%s sslmode=disable",
 		os.Getenv("dbDirection"),
 		5432,
 		os.Getenv("dbUser"),
@@ -64,7 +64,7 @@ func initRouter(userC *controllers.Users, rolesC *controllers.Roles, teamsC *con
 			secured.GET("/roles", rolesC.RetrieveAllRoles)
 			secured.GET("/roleUser", rolesC.RetrieveUsersOfRol)
 
-			secured.GET("/team/:id", teamsC.RetrieveCompleteTeam)
+			secured.GET("/team", teamsC.RetrieveCompleteTeam)
 			secured.PUT("/team", teamsC.CreateTeam)
 		}
 	}

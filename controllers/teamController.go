@@ -18,13 +18,22 @@ func NewTeams(ts models.TeamDB) *Teams {
 }
 
 /*
-// GET /team/:id
+// GET /team
 // Obtain the ID number of team from the body and search
 */
 func (ts *Teams) RetrieveCompleteTeam(context *gin.Context) {
 
+	team := &models.Team{}
+
+	// Obtain the body in the request and parse to the team
+	if err := context.ShouldBindJSON(team); err != nil {
+		context.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		context.Abort()
+		return
+	}
+
 	// Retrieve the entire team data by the param of the url
-	team, err := ts.ts.AllTeamByID(context.Param("id"))
+	team, err := ts.ts.AllTeamByID(team.ID)
 
 	if err != nil {
 		context.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
