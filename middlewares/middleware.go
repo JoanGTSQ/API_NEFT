@@ -1,9 +1,11 @@
 package middlewares
 
 import (
+	"os"
+
 	"github.com/gin-gonic/gin"
 	"neft.web/auth"
-	"os"
+	"neft.web/models"
 )
 
 func RequireAuth() gin.HandlerFunc {
@@ -16,7 +18,7 @@ func RequireAuth() gin.HandlerFunc {
 		tokenString := context.GetHeader("neftAuth")
 
 		if tokenString == "" {
-			context.JSON(401, gin.H{"error": "request does not contain an access token"})
+			context.JSON(401, gin.H{"error": models.ERR_JWT_TOKEN_REQUIRED.Error()})
 			context.Abort()
 			return
 		}
@@ -28,8 +30,8 @@ func RequireAuth() gin.HandlerFunc {
 		}
 
 		if os.Getenv("maitenance") == "true" {
-			context.JSON(503,gin.H{"maitenance": true})
-      context.Abort()
+			context.JSON(503, gin.H{"maitenance": true})
+			context.Abort()
 			return
 		}
 

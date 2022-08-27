@@ -435,7 +435,7 @@ type User struct {
 	NeftModel
 	Name         string    `gorm:"not null" json:"username"`
 	FullName     string    `json:"full_name"`
-	Email        string    `gorm:"not null;unique_index" json:"email"`
+	Email        string    `gorm:"not null" json:"email"`
 	Password     string    `gorm:"-" json:"password"`
 	PasswordHash string    `gorm:"not null" json:"-"`
 	Remember     string    `gorm:"-" json:"-"`

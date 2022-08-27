@@ -55,6 +55,7 @@ func initRouter(userC *controllers.Users, rolesC *controllers.Roles, teamsC *con
 		{
 			secured.GET("/user", userC.RetrieveUser)
 			secured.GET("/user/:id/recover", userC.InitiateReset)
+			secured.POST("/user/:id/recover", userC.CompleteReset)
 			secured.GET("/users", userC.RetrieveAllUsers)
 			secured.POST("/users", userC.CreateUser)
 			secured.PATCH("/users", userC.UpdateUser)

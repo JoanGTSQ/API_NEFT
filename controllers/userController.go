@@ -17,6 +17,11 @@ type LoginStruct struct {
 	Password string `json:"password"`
 }
 
+type CompletePsswdReset struct {
+	Token    string
+	Password string
+}
+
 func NewUsers(us models.UserService) *Users {
 	return &Users{
 		us: us,
@@ -192,9 +197,11 @@ func (us *Users) Login(context *gin.Context) {
 }
 
 // GET /user/:id/recover
+// Initiate the reset password from the id param and return a token
 func (us *Users) InitiateReset(context *gin.Context) {
 
 	token, err := us.us.InitiateReset(context.Param("id"))
+
 	if err != nil {
 		context.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		context.Abort()
@@ -202,4 +209,37 @@ func (us *Users) InitiateReset(context *gin.Context) {
 	}
 
 	context.JSON(http.StatusOK, token)
+}
+
+// POST /user/:id/recover
+// Obtain token and new password from the body and complete the reset
+func (us *Users) CompleteReset(context *gin.Context) {
+	var form CompletePsswdReset
+
+	// Obtain the body in the request and parse to the LoginStruct
+	if err := context.ShouldBindJSON(&form); err != nil {
+		context.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		context.Abort()
+		return
+	}
+
+	// Complete the reset password from the body
+	user, err := us.us.CompleteReset(form.Token, form.Password)
+	if err != nil {
+		context.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		context.Abort()
+		return
+	}
+
+	// Generate  JWT Token
+	tokenString, err := auth.GenerateJWT(user.RememberHash, user.RolID)
+	if err != nil {
+		context.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		context.Abort()
+		return
+	}
+
+	// Insert token in the header and return a 200 Code
+	context.Header("neftAuth", tokenString)
+	context.AbortWithStatus(http.StatusOK)
 }
