@@ -39,12 +39,14 @@ func main() {
 	r := initRouter(userC, rolesC, teamsC)
 
 	r.Use(middlewares.CORSMiddleware())
+  
+
 	r.Run()
 }
 
 // Generate a router with directions and middlewares
 func initRouter(userC *controllers.Users, rolesC *controllers.Roles, teamsC *controllers.Teams) *gin.Engine {
-	router := gin.Default()
+	router := gin.Default()  
 
 	api := router.Group("/v1")
 	{
