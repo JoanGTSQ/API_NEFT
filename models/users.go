@@ -2,7 +2,6 @@ package models
 
 import (
 	"errors"
-	"fmt"
 	"regexp"
 	"strconv"
 	"strings"
@@ -37,7 +36,7 @@ type UserDB interface {
 type UserService interface {
 	Authenticate(email, password string) (*User, error)
 
-	InitiateReset(userID uint) (string, error)
+	InitiateReset(userID string) (string, error)
 	CompleteReset(token, newPw string) (*User, error)
 	UserDB
 }
@@ -213,21 +212,12 @@ func (uv *userValidator) emailsIsAvail(user *User) error {
 
 	switch err {
 	case ERR_NOT_FOUND:
-		fmt.Println("lo detecto bien inutil")
 		return nil
 	case nil:
 
 	default:
 		return ERR_MAIL_NOT_EXIST
 	}
-	// fmt.Println(errorController.RetrieveError(errorController.ERR_NOT_FOUND))
-	// if err == errorController.RetrieveError(errorController.ERR_NOT_FOUND) {
-	// 	return nil
-	// }
-	// fmt.Println("pass two")
-	// if err != nil {
-	// 	return errorController.RetrieveError(errorController.ERR_MAIL_NOT_EXIST)
-	// }
 
 	if user.ID != existing.ID {
 		return ERR_MAIL_IS_TAKEN
@@ -262,6 +252,7 @@ func (uv *userValidator) Update(user *User) error {
 		uv.passwordMinLength,
 		uv.bcryptPassword,
 		uv.passwordHashRequired,
+		uv.defaultify,
 		uv.rememberMinBytes,
 		uv.hmacRemember,
 		uv.rememberHashRequired,
@@ -325,9 +316,13 @@ func (ug *userGorm) ByRemember(rememberHash string) (*User, error) {
 	return &user, err
 }
 
-func (us *userService) InitiateReset(userID uint) (string, error) {
+func (us *userService) InitiateReset(userID string) (string, error) {
+	id, err := strconv.Atoi(userID)
+	if err != nil {
+		return "", ERR_ID_INVALID
+	}
 	pwr := pwReset{
-		UserID: userID,
+		UserID: uint(id),
 	}
 	if err := us.pwResetDB.Create(&pwr); err != nil {
 		return "", err
@@ -440,7 +435,7 @@ type User struct {
 	NeftModel
 	Name         string    `gorm:"not null" json:"username"`
 	FullName     string    `json:"full_name"`
-	Email        string    `gorm:"not null;unique_index" json:"email"`
+	Email        string    `gorm:"not null" json:"email"`
 	Password     string    `gorm:"-" json:"password"`
 	PasswordHash string    `gorm:"not null" json:"-"`
 	Remember     string    `gorm:"-" json:"-"`

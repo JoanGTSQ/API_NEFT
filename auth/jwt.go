@@ -1,10 +1,11 @@
 package auth
 
 import (
-	"errors"
+	"fmt"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
+	"neft.web/models"
 )
 
 var jwtKey = []byte("Sabadell0310JED")
@@ -28,6 +29,7 @@ func GenerateJWT(remmemberHash string, roleID int) (tokenString string, err erro
 	tokenString, err = token.SignedString(jwtKey)
 	return
 }
+
 func ValidateToken(signedToken string) (err error) {
 	token, err := jwt.ParseWithClaims(
 		signedToken,
@@ -37,19 +39,23 @@ func ValidateToken(signedToken string) (err error) {
 		},
 	)
 	if err != nil {
+		fmt.Println(err)
 		return
 	}
 	claims, ok := token.Claims.(*JWTClaim)
 	if !ok {
-		err = errors.New("couldn't parse claims")
+		fmt.Println("Hola")
+		err = models.ERR_JWT_CLAIMS_INVALID
 		return
 	}
 	if claims.ExpiresAt < time.Now().Local().Unix() {
-		err = errors.New("token expired")
+		fmt.Println("Adios")
+		err = models.ERR_JWT_TOKEN_EXPIRED
 		return
 	}
 	return
 }
+
 func ReturnClaims(signedToken string) (claim *JWTClaim, err error) {
 	token, err := jwt.ParseWithClaims(
 		signedToken,
@@ -59,12 +65,12 @@ func ReturnClaims(signedToken string) (claim *JWTClaim, err error) {
 		},
 	)
 	if err != nil {
-		return
+		return nil, err
 	}
 	claims, ok := token.Claims.(*JWTClaim)
 	if !ok {
-		err = errors.New("couldn't parse claims")
-		return
+		err = models.ERR_JWT_CLAIMS_INVALID
+		return nil, err
 	}
 
 	return claims, nil

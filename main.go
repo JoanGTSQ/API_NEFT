@@ -50,20 +50,28 @@ func initRouter(userC *controllers.Users, rolesC *controllers.Roles, teamsC *con
 	{
 		api.PUT("/auth", userC.RegisterUser)
 		api.POST("/auth", userC.Login)
-		
 
 		secured := api.Group("/secured").Use(middlewares.RequireAuth())
 		{
+			// USER
 			secured.GET("/user", userC.RetrieveUser)
+			secured.POST("/user", userC.CreateUser)
+			secured.PATCH("/user", userC.UpdateUser)
+			secured.DELETE("/user/:id", userC.DeleteUser)
+			secured.GET("/user/:id/recover", userC.InitiateReset)
+			secured.POST("/user/:id/recover", userC.CompleteReset)
 			secured.GET("/users", userC.RetrieveAllUsers)
-			secured.POST("/users", userC.CreateUser)
-			secured.DELETE("/users/:id", userC.DeleteUser)
 
+			// ROL
 			secured.GET("/roles", rolesC.RetrieveAllRoles)
 			secured.GET("/roleUser", rolesC.RetrieveUsersOfRol)
 
-      secured.GET("/team/:id", teamsC.RetrieveCompleteTeam)
-      secured.PUT("/team", teamsC.CreateTeam)
+			// TEAM
+			secured.GET("/team", teamsC.RetrieveCompleteTeam)
+			secured.PUT("/team", teamsC.CreateTeam)
+			secured.PATCH("/team", teamsC.UpdateTeam)
+			secured.DELETE("/team", teamsC.DeleteTeam)
+			secured.GET("/teams", teamsC.RetrieveAllTeams)
 		}
 	}
 	return router

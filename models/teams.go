@@ -2,8 +2,7 @@ package models
 
 import (
 	"regexp"
-  "strconv"
-	valid "github.com/asaskevich/govalidator"
+
 	"github.com/jinzhu/gorm"
 	_ "github.com/lib/pq"
 	"neft.web/hash"
@@ -11,12 +10,12 @@ import (
 
 type TeamDB interface {
 	ByID(id uint) (*Team, error)
-	AllTeamByID(id string) (*[]Team, error)
+	AllTeamByID(team *Team) (*Team, error)
+	AllTeams() ([]*Team, error)
 
-
-  Create(team *Team) error
+	Create(team *Team) error
 	Update(team *Team) error
-	Delete(id string) error
+	Delete(team *Team) error
 }
 
 type TeamService interface {
@@ -71,19 +70,13 @@ func (tg *teamGorm) Create(team *Team) error {
 	return nil
 }
 
-func (tg *teamGorm) Delete(id string) error {
-	varInt, err := strconv.Atoi(id)
-	if err != nil {
-		return ERR_ID_INVALID
-	}
-	team := Team{NeftModel: NeftModel{ID: uint(varInt)}}
+func (tg *teamGorm) Delete(team *Team) error {
 	return tg.db.Delete(&team).Error
 }
 
 func (tg *teamGorm) Update(team *Team) error {
 	return tg.db.Save(team).Error
 }
-
 
 func (ug *teamGorm) ByID(id uint) (*Team, error) {
 	var team Team
@@ -93,12 +86,8 @@ func (ug *teamGorm) ByID(id uint) (*Team, error) {
 }
 
 // SEARCH BY ID
-func (ug *teamGorm) AllTeamByID(id string) (*[]Team, error) {
-	if !valid.IsInt(id) {
-		return nil, ERR_ID_INVALID
-	}
-	var team []Team
-	db := ug.db.Where("id = ?", id).
+func (ug *teamGorm) AllTeamByID(team *Team) (*Team, error) {
+	db := ug.db.Where("id = ?", team.ID).
 		Preload("TeamLead").
 		// Preload("TeamLead.Rol").
 		Preload("Member1").
@@ -114,8 +103,30 @@ func (ug *teamGorm) AllTeamByID(id string) (*[]Team, error) {
 		Preload("Division1").
 		Preload("Division1.Commandant").
 		Preload("AssignedMission").
-		Find(&team).Error
-	return &team, db
+		First(&team).Error
+	return team, db
+}
+
+func (ug *teamGorm) AllTeams() ([]*Team, error) {
+	var team []*Team
+	db := ug.db.
+		Preload("TeamLead").
+		// Preload("TeamLead.Rol").
+		Preload("Member1").
+		// Preload("Member1.Rol").
+		Preload("Member2").
+		// Preload("Member2.Rol").
+		Preload("Member3").
+		// Preload("Member3.Rol").
+		Preload("Member4").
+		// Preload("Member4.Rol").
+		Preload("Member5").
+		// Preload("Member5.Rol").
+		Preload("Division1").
+		Preload("Division1.Commandant").
+		Preload("AssignedMission").
+		Find(team).Error
+	return team, db
 }
 
 type Team struct {
