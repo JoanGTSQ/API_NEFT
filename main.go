@@ -14,7 +14,7 @@ func main() {
 
 	// Create connection with DB
 	services, err := models.NewServices(fmt.Sprintf(
-		"host=%s port=%d user=%s password=%s dbname=%s sslmode=disable",
+		"host=%s port=%d user=%s password=%s dbname=%s sslmode=require",
 		os.Getenv("dbDirection"),
 		5432,
 		os.Getenv("dbUser"),
@@ -53,19 +53,25 @@ func initRouter(userC *controllers.Users, rolesC *controllers.Roles, teamsC *con
 
 		secured := api.Group("/secured").Use(middlewares.RequireAuth())
 		{
+			// USER
 			secured.GET("/user", userC.RetrieveUser)
+			secured.POST("/user", userC.CreateUser)
+			secured.PATCH("/user", userC.UpdateUser)
+			secured.DELETE("/user/:id", userC.DeleteUser)
 			secured.GET("/user/:id/recover", userC.InitiateReset)
 			secured.POST("/user/:id/recover", userC.CompleteReset)
 			secured.GET("/users", userC.RetrieveAllUsers)
-			secured.POST("/users", userC.CreateUser)
-			secured.PATCH("/users", userC.UpdateUser)
-			secured.DELETE("/users/:id", userC.DeleteUser)
 
+			// ROL
 			secured.GET("/roles", rolesC.RetrieveAllRoles)
 			secured.GET("/roleUser", rolesC.RetrieveUsersOfRol)
 
+			// TEAM
 			secured.GET("/team", teamsC.RetrieveCompleteTeam)
 			secured.PUT("/team", teamsC.CreateTeam)
+			secured.PATCH("/team", teamsC.UpdateTeam)
+			secured.DELETE("/team", teamsC.DeleteTeam)
+			secured.GET("/teams", teamsC.RetrieveAllTeams)
 		}
 	}
 	return router
