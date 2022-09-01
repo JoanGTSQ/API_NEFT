@@ -2,6 +2,7 @@ package models
 
 import (
 	"regexp"
+	"time"
 
 	"github.com/jinzhu/gorm"
 	_ "github.com/lib/pq"
@@ -70,4 +71,7 @@ type War struct {
 
 	FieldID int   `gorm:"not null"`
 	Field   Field `gorm:"-"`
+
+	StartDate time.Time
+	EndDate   time.Time
 }

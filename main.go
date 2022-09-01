@@ -1,18 +1,36 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"os"
 
 	"github.com/gin-gonic/gin"
 	"neft.web/controllers"
+	"neft.web/logger"
 	"neft.web/middlewares"
 	"neft.web/models"
 )
 
+var (
+	isProd bool
+
+	debug bool
+  route string
+)
+
+func init() {
+	flag.BoolVar(&isProd, "isProd", false, "This will ensure all pro vars are enabled")
+	flag.BoolVar(&debug, "debug", false, "This will export all stats to file log.log")
+  flag.StringVar(&route, "route", "log.txt", "This will create the log file in the desired route")
+}
+
 func main() {
+  
+	logger.InitLog(debug, route)
 
 	// Create connection with DB
+  logger.Debug.Println("Creating connection with DB")
 	services, err := models.NewServices(fmt.Sprintf(
 		"host=%s port=%d user=%s password=%s dbname=%s sslmode=require",
 		os.Getenv("dbDirection"),
@@ -32,22 +50,24 @@ func main() {
 	services.AutoMigrate()
 
 	// Retrieve handlers struct
+  logger.Debug.Println("Creating all services handlers")
 	userC := controllers.NewUsers(services.User)
 	rolesC := controllers.NewRoles(services.Rol)
 	teamsC := controllers.NewTeams(services.Team)
-	// Generate Router
-	r := initRouter(userC, rolesC, teamsC)
+	
+  // Generate Router
+	logger.Debug.Println("Creating gin router")
+  r := initRouter(userC, rolesC, teamsC)
 
 	r.Use(middlewares.CORSMiddleware())
   
-
+  logger.Info.Println("Run server")
 	r.Run()
 }
 
 // Generate a router with directions and middlewares
 func initRouter(userC *controllers.Users, rolesC *controllers.Roles, teamsC *controllers.Teams) *gin.Engine {
-	router := gin.Default()  
-
+	router := gin.Default()
 	api := router.Group("/v1")
 	{
 		api.PUT("/auth", userC.RegisterUser)

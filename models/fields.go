@@ -74,8 +74,11 @@ func (tg *fieldGorm) Update(field *Field) error {
 	return tg.db.Save(field).Error
 }
 
+
+
 type Field struct {
 	NeftModel
 
-	Name string `gorm:"not null"`
+	Name   string `gorm:"not null"`
+	Coords string
 }

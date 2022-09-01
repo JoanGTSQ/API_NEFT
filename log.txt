@@ -1,0 +1,37 @@
+
+[INFO] 2022/09/01 10:26:24 main.go:64: Run server
+
+[INFO] 2022/09/01 10:43:16 logController.go:49: 
+
+[INFO] 2022/09/01 10:43:42 logController.go:49: 
+
+[INFO] 2022/09/01 10:43:44 logController.go:49: v
+
+[INFO] 2022/09/01 10:43:49 logController.go:49: version: 
+
+[INFO] 2022/09/01 10:43:52 logController.go:49: version:  ec2-34-246-227-219.eu-west-1.compute.amazonaws.com
+
+[INFO] 2022/09/01 10:44:03 logController.go:49: version:  
+
+[INFO] 2022/09/01 10:44:26 logController.go:49: version:  
+
+[INFO] 2022/09/01 10:44:39 logController.go:49: version:  v1
+
+[INFO] 2022/09/01 10:45:09 main.go:64: Run server
+
+[INFO] 2022/09/01 10:57:46 logController.go:49: version: 1.1.0
+
+[INFO] 2022/09/01 10:57:48 logController.go:49: version: 1.1.1
+
+[INFO] 2022/09/01 10:58:02 logController.go:49: version: 1.1.1
+L
+
+[INFO] 2022/09/01 10:58:04 logController.go:49: version: 1.1.1
+Loading....
+
+[INFO] 2022/09/01 10:58:35 main.go:64: Run server
+
+[INFO] 2022/09/01 12:32:35 logController.go:49: version: 1.1.1
+Loading....
+
+[INFO] 2022/09/01 12:33:07 main.go:64: Run server
