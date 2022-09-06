@@ -9,6 +9,9 @@ import (
 )
 
 type FieldDB interface {
+	ByID(field *Field) error
+	AllFields() ([]*Field, error)
+
 	Create(field *Field) error
 	Update(field *Field) error
 	Delete(field *Field) error
@@ -74,11 +77,25 @@ func (tg *fieldGorm) Update(field *Field) error {
 	return tg.db.Save(field).Error
 }
 
+func (tg *fieldGorm) ByID(field *Field) error {
 
+	db := tg.db.Where("id = ?", field.ID).
+		First(&field).Error
+	return db
+}
+
+func (tg *fieldGorm) AllFields() ([]*Field, error) {
+	var fields []*Field
+	err := tg.db.Find(&fields).Error
+	if err != nil {
+		return nil, err
+	}
+	return fields, nil
+}
 
 type Field struct {
 	NeftModel
 
-	Name   string `gorm:"not null"`
-	Coords string
+	Name   string `gorm:"not null" json:"name"`
+	Coords string `gorm:"not null" json:"coords"`
 }

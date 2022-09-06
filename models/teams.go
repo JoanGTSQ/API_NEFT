@@ -102,6 +102,8 @@ func (ug *teamGorm) AllTeamByID(team *Team) (*Team, error) {
 		// Preload("Member5.Rol").
 		Preload("Division1").
 		Preload("Division1.Commandant").
+		Preload("Division1.War").
+		Preload("Division1.War.Field").
 		Preload("AssignedMission").
 		First(&team).Error
 	return team, db

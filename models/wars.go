@@ -69,8 +69,8 @@ type War struct {
 
 	Name string `gorm:"not null"`
 
-	FieldID int   `gorm:"not null"`
-	Field   Field `gorm:"-"`
+	FieldID int   `json:"fieldid"`
+	Field   Field `gorm:"foreignkey:fieldID" json:"field"`
 
 	StartDate time.Time
 	EndDate   time.Time

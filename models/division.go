@@ -10,6 +10,6 @@ type Division struct {
 	CommandantID int  `json:"commandantid"`
 	Commandant   User `gorm:"foreignkey:commandantID" json:"commandant"`
 
-	WarID int `gorm:""`
-	War   War `gorm:"-"`
+	WarID int `json:"warid"`
+	War   War `gorm:"foreignkey:warID" json:"war"`
 }

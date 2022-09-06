@@ -15,32 +15,45 @@ import (
 var (
 	isProd bool
 
-	debug bool
-  route string
+	debug   bool
+	debugDB bool
+	ssl     bool
+	route   string
 )
 
 func init() {
 	flag.BoolVar(&isProd, "isProd", false, "This will ensure all pro vars are enabled")
 	flag.BoolVar(&debug, "debug", false, "This will export all stats to file log.log")
-  flag.StringVar(&route, "route", "log.txt", "This will create the log file in the desired route")
+	flag.BoolVar(&debugDB, "debugdb", false, "This will enable logs of db")
+	flag.BoolVar(&ssl, "ssl", false, "This will require ssl to the ddbb connection")
+	flag.StringVar(&route, "route", "log.txt", "This will create the log file in the desired route")
+	gin.SetMode(gin.ReleaseMode)
 }
 
 func main() {
-  flag.Parse()
+	flag.Parse()
 	logger.InitLog(debug, route)
-
+	var sslmode string
+	if ssl {
+		sslmode = "require"
+	} else {
+		sslmode = "disable"
+	}
 	// Create connection with DB
-  logger.Debug.Println("Creating connection with DB")
+	logger.Debug.Println("Creating connection with DB")
+
 	services, err := models.NewServices(fmt.Sprintf(
-		"host=%s port=%d user=%s password=%s dbname=%s sslmode=require",
+		"host=%s port=%d user=%s password=%s dbname=%s sslmode=%s",
 		os.Getenv("dbDirection"),
 		5432,
 		os.Getenv("dbUser"),
 		os.Getenv("dbPsswd"),
-		os.Getenv("dbName")))
+		os.Getenv("dbName"),
+		sslmode),
+		debugDB)
 
 	if err != nil {
-    logger.Error.Println("error db", err)
+		logger.Error.Println("error db", err)
 		os.Exit(0)
 	}
 
@@ -50,23 +63,26 @@ func main() {
 	services.AutoMigrate()
 
 	// Retrieve handlers struct
-  logger.Debug.Println("Creating all services handlers")
+	logger.Debug.Println("Creating all services handlers")
 	userC := controllers.NewUsers(services.User)
 	rolesC := controllers.NewRoles(services.Rol)
 	teamsC := controllers.NewTeams(services.Team)
-	
-  // Generate Router
+	fieldsC := controllers.NewFields(services.Field)
+	// Generate Router
 	logger.Debug.Println("Creating gin router")
-  r := initRouter(userC, rolesC, teamsC)
+	r := initRouter(userC, rolesC, teamsC, fieldsC)
 
 	r.Use(middlewares.CORSMiddleware())
-  
-  logger.Info.Println("Run server")
+
+	logger.Info.Println("Runnig server")
 	r.Run()
 }
 
 // Generate a router with directions and middlewares
-func initRouter(userC *controllers.Users, rolesC *controllers.Roles, teamsC *controllers.Teams) *gin.Engine {
+func initRouter(userC *controllers.Users,
+	rolesC *controllers.Roles,
+	teamsC *controllers.Teams,
+	fieldsC *controllers.Fields) *gin.Engine {
 	router := gin.Default()
 	api := router.Group("/v1")
 	{
@@ -94,6 +110,14 @@ func initRouter(userC *controllers.Users, rolesC *controllers.Roles, teamsC *con
 			secured.PATCH("/team", teamsC.UpdateTeam)
 			secured.DELETE("/team", teamsC.DeleteTeam)
 			secured.GET("/teams", teamsC.RetrieveAllTeams)
+
+			// FIELD
+
+			secured.GET("/field", fieldsC.RetrieveField)
+			secured.PUT("/field", fieldsC.CreateField)
+			secured.DELETE("/field", fieldsC.DeleteField)
+			secured.PATCH("/field", fieldsC.UpdateField)
+			secured.GET("/fields", fieldsC.RetrieveAllFields)
 		}
 	}
 	return router

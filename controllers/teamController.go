@@ -94,7 +94,7 @@ func (ts *Teams) CreateTeam(context *gin.Context) {
 }
 
 /*
-// DELETE /team/:id
+// DELETE /team
 // Obtain team data, search by ID and delete it, return code 202
 */
 func (ts *Teams) DeleteTeam(context *gin.Context) {

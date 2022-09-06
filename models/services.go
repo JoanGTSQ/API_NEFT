@@ -6,27 +6,29 @@ import (
 	"github.com/jinzhu/gorm"
 )
 
-func NewServices(connectionInfo string) (*Services, error) {
+func NewServices(connectionInfo string, logMode bool) (*Services, error) {
 	db, err := gorm.Open("postgres", connectionInfo)
 	if err != nil {
 		return nil, err
 	}
 
-	db.LogMode(false)
+	db.LogMode(logMode)
 
 	return &Services{
-		User: NewUserService(db),
-		Rol:  NewRolService(db),
-		Team: NewTeamService(db),
-		db:   db,
+		User:  NewUserService(db),
+		Rol:   NewRolService(db),
+		Team:  NewTeamService(db),
+		Field: NewFieldService(db),
+		db:    db,
 	}, nil
 }
 
 type Services struct {
-	User UserService
-	Rol  RolService
-	Team TeamService
-	db   *gorm.DB
+	User  UserService
+	Rol   RolService
+	Team  TeamService
+	Field FieldService
+	db    *gorm.DB
 }
 
 func (s *Services) Close() error {
