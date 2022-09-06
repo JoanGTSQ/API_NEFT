@@ -10,7 +10,6 @@ import(
  
  
 var (
-
     Warning*log.Logger
     Info   *log.Logger
 		Debug    *log.Logger
