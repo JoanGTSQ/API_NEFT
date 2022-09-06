@@ -26,7 +26,7 @@ func init() {
 }
 
 func main() {
-  
+  flag.Parse()
 	logger.InitLog(debug, route)
 
 	// Create connection with DB
@@ -40,7 +40,7 @@ func main() {
 		os.Getenv("dbName")))
 
 	if err != nil {
-		fmt.Println("error db", err)
+    logger.Error.Println("error db", err)
 		os.Exit(0)
 	}
 

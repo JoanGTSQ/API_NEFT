@@ -1,4 +1,4 @@
-run = "go get github.com/zzwx/fresh && ~/go/bin/fresh"
+run = "go run . -debug=true -route=log/log.txt"
 entrypoint = "main.go"
 
 [languages.go]

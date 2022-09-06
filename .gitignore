@@ -8,6 +8,7 @@ node_modules/
 dist/
 tmp/
 neft.web
+log/
 
 # Compiled Java class files
 *.class
