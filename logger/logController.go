@@ -10,7 +10,7 @@ import(
  
  
 var (
-    Warning*log.Logger
+    Warning *log.Logger
     Info   *log.Logger
 		Debug    *log.Logger
     Error   *log.Logger
@@ -18,33 +18,46 @@ var (
     InfoColor = color.New(color.Bold, color.FgWhite).SprintFunc()
     DebugColor = color.New(color.Bold, color.FgGreen).SprintFunc()
     WarningColor = color.New(color.Bold, color.FgYellow).SprintFunc()
-
+    Wrt io.Writer
 )
-func InitLog(debugEnabled bool, route string){
+func InitLog(debugEnabled bool, route, version string){
   
 	f, err := os.OpenFile(route, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {
 		log.Fatalf("error opening file: %v", err)
 	}
-	wrt := io.MultiWriter(os.Stdout, f)
-	log.SetOutput(wrt)
+	Wrt = io.MultiWriter(os.Stdout, f)
+	log.SetOutput(Wrt)
   
-	Info = log.New(wrt, InfoColor("\n[INFO] "), log.Ldate|log.Ltime|log.Lshortfile)
-  Info.SetOutput(wrt)
+	Info = log.New(Wrt, InfoColor("\n[INFO] "), log.Ldate|log.Ltime|log.Lshortfile)
+  Info.SetOutput(Wrt)
 	
-	Warning = log.New(wrt, WarningColor("\n[WARNING] "), log.Ldate|log.Ltime|log.Lshortfile)
-  Warning.SetOutput(wrt)
+	Warning = log.New(Wrt, WarningColor("\n[WARNING] "), log.Ldate|log.Ltime|log.Lshortfile)
+  Warning.SetOutput(Wrt)
   
-	Debug = log.New(wrt, DebugColor("\n[DEBUG] "), log.Ldate|log.Ltime|log.Lshortfile)
-  Debug.SetOutput(wrt)
+	Debug = log.New(Wrt, DebugColor("\n[DEBUG] "), log.Ldate|log.Ltime|log.Lshortfile)
+  Debug.SetOutput(Wrt)
 	if !debugEnabled {
 		var buff bytes.Buffer
 		Debug.SetOutput(&buff)
 	}
 	
-	Error = log.New(wrt, ErrorColor("\n[ERROR] "), log.Ldate|log.Ltime|log.Lshortfile)
-  Error.SetOutput(wrt)
+	Error = log.New(Wrt, ErrorColor("\n[ERROR] "), log.Ldate|log.Ltime|log.Lshortfile)
+  Error.SetOutput(Wrt)
 
-  Info.Println("version: 1.1.1\nLoading....")
+  PrintVersion(version)
+}
 
+func PrintVersion(version string) {
+  f, err := os.OpenFile("SDK.ver", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	if err != nil {
+		log.Fatalf("error opening file: %v", err)
+	}
+  wrt := io.MultiWriter(os.Stdout, f)
+  
+  versionLog := log.New(wrt, DebugColor("\n[VERSION] "), 0)
+  versionLog.SetOutput(wrt)
+
+  versionLog.Println("COBRA ", version)
+  
 }

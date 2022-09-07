@@ -9,6 +9,7 @@ dist/
 tmp/
 neft.web
 log/
+SDK.ver
 
 # Compiled Java class files
 *.class

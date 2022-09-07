@@ -28,11 +28,13 @@ func init() {
 	flag.BoolVar(&ssl, "ssl", false, "This will require ssl to the ddbb connection")
 	flag.StringVar(&route, "route", "log.txt", "This will create the log file in the desired route")
 	gin.SetMode(gin.ReleaseMode)
+
 }
 
 func main() {
 	flag.Parse()
-	logger.InitLog(debug, route)
+	logger.InitLog(debug, route, "1.1.0")
+	gin.DefaultWriter = logger.Wrt
 	var sslmode string
 	if ssl {
 		sslmode = "require"
@@ -59,7 +61,7 @@ func main() {
 
 	defer services.Close()
 
-	// Auto generate new tables or modifications in every start | Use DestructiveReset() to delete all data
+  // Auto generate new tables or modifications in every start | Use DestructiveReset() to delete all data
 	services.AutoMigrate()
 
 	// Retrieve handlers struct
@@ -73,7 +75,6 @@ func main() {
 	r := initRouter(userC, rolesC, teamsC, fieldsC)
 
 	r.Use(middlewares.CORSMiddleware())
-
 	logger.Info.Println("Runnig server")
 	r.Run(":80")
 }
