@@ -18,6 +18,7 @@ var (
     InfoColor = color.New(color.Bold, color.FgWhite).SprintFunc()
     DebugColor = color.New(color.Bold, color.FgGreen).SprintFunc()
     WarningColor = color.New(color.Bold, color.FgYellow).SprintFunc()
+    Versioncolor = color.New(color.Bold, color.FgHiCyan).SprintFunc()
     Wrt io.Writer
 )
 func InitLog(debugEnabled bool, route, version string){
@@ -49,15 +50,18 @@ func InitLog(debugEnabled bool, route, version string){
 }
 
 func PrintVersion(version string) {
+  os.Remove("SDK.ver")
   f, err := os.OpenFile("SDK.ver", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {
 		log.Fatalf("error opening file: %v", err)
 	}
-  wrt := io.MultiWriter(os.Stdout, f)
-  
-  versionLog := log.New(wrt, DebugColor("\n[VERSION] "), 0)
-  versionLog.SetOutput(wrt)
 
-  versionLog.Println("COBRA ", version)
+  versionLog := log.New(os.Stdout, Versioncolor("\n[VERSION] "), 0)
+  versionLog.SetOutput(os.Stdout)
+  versionLog.Println("COBRA ", version, Versioncolor("[VERSION]"))
   
+  vLog := log.New(f,"",0)
+  vLog.SetOutput(f)
+  
+  vLog.Println("COBRA VERSION: ", version)
 }
