@@ -70,9 +70,10 @@ func main() {
 	rolesC := controllers.NewRoles(services.Rol)
 	teamsC := controllers.NewTeams(services.Team)
 	fieldsC := controllers.NewFields(services.Field)
+  devicesC := controllers.NewDevices(services.Device)
 	// Generate Router
 	logger.Debug.Println("Creating gin router")
-	r := initRouter(userC, rolesC, teamsC, fieldsC)
+	r := initRouter(userC, rolesC, teamsC, fieldsC, devicesC)
 
 	r.Use(middlewares.CORSMiddleware())
 	logger.Info.Println("Runnig server")
@@ -83,7 +84,8 @@ func main() {
 func initRouter(userC *controllers.Users,
 	rolesC *controllers.Roles,
 	teamsC *controllers.Teams,
-	fieldsC *controllers.Fields) *gin.Engine {
+	fieldsC *controllers.Fields,
+  devicesC *controllers.Devices) *gin.Engine {
 	router := gin.Default()
 	api := router.Group("/v1")
 	{
@@ -120,6 +122,8 @@ func initRouter(userC *controllers.Users,
 			secured.PATCH("/field", fieldsC.UpdateField)
 			secured.GET("/fields", fieldsC.RetrieveAllFields)
 		}
+    
 	}
+  api.Use(devicesC.RetrieveByMac)
 	return router
 }

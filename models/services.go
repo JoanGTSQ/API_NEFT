@@ -19,6 +19,7 @@ func NewServices(connectionInfo string, logMode bool) (*Services, error) {
 		Rol:   NewRolService(db),
 		Team:  NewTeamService(db),
 		Field: NewFieldService(db),
+    Device: NewDeviceService(db),
 		db:    db,
 	}, nil
 }
@@ -28,6 +29,7 @@ type Services struct {
 	Rol   RolService
 	Team  TeamService
 	Field FieldService
+  Device DeviceService
 	db    *gorm.DB
 }
 
@@ -39,7 +41,7 @@ func (s *Services) DestructiveReset() error {
 	if err := s.db.DropTableIfExists(&Rol{}, &pwReset{}, &User{},
 		&Team{}, &Division{}, &Target{},
 		&Mission{},
-		&Field{}, &War{}).Error; err != nil {
+		&Field{}, &War{}, &Device{}).Error; err != nil {
 		return err
 	}
 	return s.AutoMigrate()
@@ -56,7 +58,7 @@ func (s *Services) AutoMigrate() error {
 	if err := s.db.AutoMigrate(&User{}, &pwReset{}, &Rol{},
 		&Field{}, &War{},
 		&Mission{}, &Target{}, &Division{},
-		&Team{}).Error; err != nil {
+		&Team{}, &Device{}).Error; err != nil {
 		return err
 	}
 	return nil
