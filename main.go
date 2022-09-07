@@ -33,7 +33,7 @@ func init() {
 
 func main() {
 	flag.Parse()
-	logger.InitLog(debug, route, "1.1.0")
+	logger.InitLog(debug, route, "1.1.1")
 	gin.DefaultWriter = logger.Wrt
 	var sslmode string
 	if ssl {
