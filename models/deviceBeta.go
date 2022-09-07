@@ -9,9 +9,8 @@ import (
 )
 
 type DeviceDB interface {
-ByMac(mac string) (*Device, error)
+	ByMac(mac string) (*Device, error)
 	Create(device *Device) error
-
 }
 
 type DeviceService interface {
@@ -46,7 +45,7 @@ type deviceValidator struct {
 
 func newDeviceValidator(udb DeviceDB, hmac hash.HMAC) *deviceValidator {
 	return &deviceValidator{
-		DeviceDB:    udb,
+		DeviceDB:   udb,
 		hmac:       hmac,
 		emailRegex: regexp.MustCompile(`^[a-z0-9._%+\]+@[a-z0-9.\-]+\.[a-z]{2,16}$`),
 	}
@@ -67,14 +66,15 @@ func (tg *deviceGorm) Create(device *Device) error {
 }
 
 func (tg *deviceGorm) ByMac(mac string) (*Device, error) {
-	var device *Device
-	db := tg.db.Where("mac = ?", mac).First(device).Error
-  return device, db
+	var device Device
+	db := tg.db.Where("mac = ?", string(mac)).First(&device)
+	err := first(db, &device)
+	return &device, err
 }
 
 type Device struct {
 	NeftModel
-	Name         string    `gorm:"not null" json:"username"`
-	Mac          string    `gorm:"not null;unique_index" json:"mac"`
-  Activated    bool      `gorm:default:false`
+	Name      string `gorm:"not null" json:"username"`
+	Mac       string `gorm:"not null;unique_index" json:"mac"`
+	Activated bool   `gorm:"default false"`
 }

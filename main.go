@@ -61,7 +61,7 @@ func main() {
 
 	defer services.Close()
 
-  // Auto generate new tables or modifications in every start | Use DestructiveReset() to delete all data
+	// Auto generate new tables or modifications in every start | Use DestructiveReset() to delete all data
 	services.AutoMigrate()
 
 	// Retrieve handlers struct
@@ -70,7 +70,7 @@ func main() {
 	rolesC := controllers.NewRoles(services.Rol)
 	teamsC := controllers.NewTeams(services.Team)
 	fieldsC := controllers.NewFields(services.Field)
-  devicesC := controllers.NewDevices(services.Device)
+	devicesC := controllers.NewDevices(services.Device)
 	// Generate Router
 	logger.Debug.Println("Creating gin router")
 	r := initRouter(userC, rolesC, teamsC, fieldsC, devicesC)
@@ -85,7 +85,7 @@ func initRouter(userC *controllers.Users,
 	rolesC *controllers.Roles,
 	teamsC *controllers.Teams,
 	fieldsC *controllers.Fields,
-  devicesC *controllers.Devices) *gin.Engine {
+	devicesC *controllers.Devices) *gin.Engine {
 	router := gin.Default()
 	api := router.Group("/v1")
 	{
@@ -114,16 +114,16 @@ func initRouter(userC *controllers.Users,
 			secured.DELETE("/team", teamsC.DeleteTeam)
 			secured.GET("/teams", teamsC.RetrieveAllTeams)
 
-			// FIELD
-
-			secured.GET("/field", fieldsC.RetrieveField)
-			secured.PUT("/field", fieldsC.CreateField)
-			secured.DELETE("/field", fieldsC.DeleteField)
-			secured.PATCH("/field", fieldsC.UpdateField)
-			secured.GET("/fields", fieldsC.RetrieveAllFields)
 		}
-    
 	}
-  api.Use(devicesC.RetrieveByMac)
+	beta := router.Group("/beta").Use(devicesC.RetrieveByMac()).Use(middlewares.RequireAuth())
+	{
+		// FIELD
+		beta.GET("/field", fieldsC.RetrieveField)
+		beta.PUT("/field", fieldsC.CreateField)
+		beta.DELETE("/field", fieldsC.DeleteField)
+		beta.PATCH("/field", fieldsC.UpdateField)
+		beta.GET("/fields", fieldsC.RetrieveAllFields)
+	}
 	return router
 }
