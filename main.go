@@ -75,7 +75,7 @@ func main() {
 	r.Use(middlewares.CORSMiddleware())
 
 	logger.Info.Println("Runnig server")
-	r.Run()
+	r.Run(":80")
 }
 
 // Generate a router with directions and middlewares

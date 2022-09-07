@@ -1,4 +1,4 @@
-run = "go run . -debug=true -route=log/log.txt"
+run = "go run . -debug=true -ssl=true -debugdb=true -route=log/log.txt"
 entrypoint = "main.go"
 
 [languages.go]
