@@ -44,8 +44,9 @@ func (db *Devices) RetrieveByMac() gin.HandlerFunc {
 		_, err = db.db.ByMac(mac.Id)
 		switch err {
 		case models.ERR_NOT_FOUND:
-			context.JSON(http.StatusBadRequest, gin.H{"error": "You don't have permission to enter beta url"})
+			context.JSON(http.StatusBadRequest, gin.H{"error": models.ERR_NOT_ENOUGH_PERMISSIONS})
 			context.Abort()
+			return
 		case nil:
 
 		default:
