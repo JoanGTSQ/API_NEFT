@@ -5,6 +5,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"neft.web/auth"
+	"neft.web/logger"
 	"neft.web/models"
 )
 
@@ -170,6 +171,7 @@ func (us *Users) Login(context *gin.Context) {
 
 	// Obtain the body in the request and parse to the LoginStruct
 	if err := context.ShouldBindJSON(&form); err != nil {
+    logger.Debug.Println(context.Writer)
 		context.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		context.Abort()
 		return
