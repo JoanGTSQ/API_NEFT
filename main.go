@@ -13,8 +13,8 @@ import (
 )
 
 var (
-	isProd bool
-
+	isProd  bool
+	port    string
 	debug   bool
 	debugDB bool
 	ssl     bool
@@ -25,6 +25,7 @@ func init() {
 	flag.BoolVar(&isProd, "isProd", false, "This will ensure all pro vars are enabled")
 	flag.BoolVar(&debug, "debug", false, "This will export all stats to file log.log")
 	flag.BoolVar(&debugDB, "debugdb", false, "This will enable logs of db")
+  flag.StringVar(&port, "port", ":8080", "This will set the port of use (:8080)")
 	flag.BoolVar(&ssl, "ssl", false, "This will require ssl to the ddbb connection")
 	flag.StringVar(&route, "route", "log.txt", "This will create the log file in the desired route")
 	gin.SetMode(gin.ReleaseMode)
@@ -76,8 +77,8 @@ func main() {
 	r := initRouter(userC, rolesC, teamsC, fieldsC, devicesC)
 
 	r.Use(middlewares.CORSMiddleware())
-	logger.Info.Println("Runnig server")
-	r.Run(":80")
+	logger.Info.Println("Runnig server on port ", port)
+	r.Run(port)
 }
 
 // Generate a router with directions and middlewares
