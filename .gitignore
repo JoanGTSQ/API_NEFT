@@ -11,6 +11,7 @@ neft.web
 log/
 SDK.ver
 COBRA
+*.txt
 # Compiled Java class files
 *.class
 
