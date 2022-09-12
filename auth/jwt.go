@@ -1,7 +1,6 @@
 package auth
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
@@ -39,17 +38,14 @@ func ValidateToken(signedToken string) (err error) {
 		},
 	)
 	if err != nil {
-		fmt.Println(err)
 		return
 	}
 	claims, ok := token.Claims.(*JWTClaim)
 	if !ok {
-		fmt.Println("Hola")
 		err = models.ERR_JWT_CLAIMS_INVALID
 		return
 	}
 	if claims.ExpiresAt < time.Now().Local().Unix() {
-		fmt.Println("Adios")
 		err = models.ERR_JWT_TOKEN_EXPIRED
 		return
 	}
